@@ -1,0 +1,134 @@
+---
+title: "Using SQL to query data"
+---
+#connecting to a database that we currently stored in our data folder
+```{r}
+library(DBI)
+
+filename<- "../data/prod_sample.db"
+my_connection <- dbConnect(RSQLite::SQLite(), dbname = filename)
+my_connection
+```
+
+
+```{r}
+#check what tables exist in this database
+dbListTables(my_connection)
+#we have two tables that exist in this database
+```
+#create sequel chunk (in sql /* is the same as #)
+#To only list first XXX Rows, replace 'where' with 'limit XXX'
+```{sql connection = my_connection}
+/* sql query to view the first ten rows of the online_retail_history table - be sure to pass in the connection */
+select*
+from online_retail_history 
+where Quantity>0
+```
+# * means everything
+#sql query to view the first five rows of the stock_description table - be sure to pass in the connection
+```{sql connection = my_connection}
+
+select*
+from stock_description 
+limit 5
+```
+
+#write a sql query to count how many rows the online_retail_history table contains
+```{sql connection = my_connection}
+
+select count(*) as number_rows
+from online_retail_history
+
+```
+#entering "as number_rows" is optional and just adds a title to help you understand
+```{sql connection = my_connection}
+/*write a sql query to count how many rows the stock_description table contains*/
+select count(*) as number_rows
+from stock_description
+
+```
+
+#write a sql query to calculate the total number of items sold
+```{sql connection=my_connection}
+
+select sum(quantity) as total_quantity
+from online_retail_history
+
+/*5176451 items sold*/
+
+```
+
+
+#write a sql query to calculate the average price of products sold 
+```{sql connection=my_connection}
+
+select avg(Price) as avg_price
+from online_retail_history
+/* therefore average price of item is 4.6 pounds*/
+```
+# sql queries can to calculate MIN(column_name) and MAX(column_name)
+# there WHERE function adds conditions
+```{sql connection=my_connection}
+SELECT MIN(price)
+FROM online_retail_history
+WHERE Price>0
+```
+#calculate multiple values at once and add titles
+```{sql connection=my_connection}
+select min(Price),
+max(Price),
+avg(Price)
+from online_retail_history
+where Price>0
+
+```
+
+#when was the first and last invoices? (HINT; which data tables have invoices, then use min/max)
+```{sql connection=my_connection}
+SELECT MIN(InvoiceDate) as First_Invoice,
+       MAX(InvoiceDate) as Last_Invoice
+FROM online_retail_history
+
+```
+#write a SQL query to select the distinct CustomerIDs from the CustomerID column
+```{sql connection=my_connection}
+select distinct CustomerID
+from online_retail_history
+
+```
+#numbers are often repeated in a table, to only list different variables use SELECT DISTINCT
+```{sql connection=my_connection}
+select distinct CustomerID
+from online_retail_history
+
+```
+
+#then count the number of distinct CustomerIDs, to show how many customers there are and eliminate the possibility for multiple orders from the same CustomerID
+```{sql connection=my_connection}
+select count(Distinct CustomerID) as number_unique_costomers
+from online_retail_history
+
+```
+
+#find country with most unique customers
+#the GROUP BY statement groups rows that have the same values into summarty rows, often used with aggregate functions like COUNT(), MIN(), MAX(), etc. to group the result set by one or more columns.
+```{sql connection=my_connection}
+select Country
+from online_retail_history
+group by Country
+order by count(distinct CustomerID) desc
+limit 1
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
